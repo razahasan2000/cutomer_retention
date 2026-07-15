@@ -91,8 +91,8 @@ ESACRIF/
 @article{vutla2025esacrif,
   title={Beyond Static Churn Prediction: An Explainable Survival-Aware 
          Customer Retention Intelligence Framework},
-  author={Vutla, Bala Aravind and Hasan, Raza},
-  journal={Southampton Solent University},
+  author={Vutla, Bala Aravind Hasan, Raza and Salman Mahmood},
+  journal={Southampton Solent University and Nazeer Hussain University},
   year={2025}
 }
 ```
