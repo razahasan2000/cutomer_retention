@@ -98,7 +98,7 @@ validation (DeLong, McNemar, bootstrap CI) are interleaved throughout.
 ESACRIF/
 ├── app.py                     # Streamlit UI
 ├── pipeline.py                # Full experiment orchestration
-├── experiments.py             # All Q1 experiments (models, stability, ablation, business, stats)
+├── experiments.py             # All experiments (models, stability, ablation, business, stats)
 ├── config.py                  # Central configuration
 ├── data/                     # Raw datasets (telco, iranian, cell2cell, bank)
 ├── src/
