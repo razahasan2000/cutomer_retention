@@ -90,13 +90,18 @@ All numbers below are taken directly from `outputs/tables/*.csv`.
 
 ## 8. Business Impact
 
+Expected profit model: expected saved = success_rate × p(churn) × CLV − cost.
+
 | Scenario | Targeted | Revenue Retained | Cost | Profit | ROI |
 |---|---|---|---|---|---|
-| 1: Random | 1,409 | $25,950.80 | $42,270 | −$16,319.20 | −38.6% |
-| 2: High-Risk Only | 367 | $5,258.46 | $11,010 | −$5,751.54 | −52.2% |
-| **3: ESACRIF** | **282** | **$16,107.91** | **$8,460** | **$7,647.91** | **+90.4%** |
+| 1: Random | 1,409 | $25,227.24 | $42,270 | −$17,042.76 | −40.3% |
+| 2: High-Risk Only | 367 | $8,339.44 | $11,010 | −$2,670.56 | −24.3% |
+| 3: ESACRIF (p×CLV > 80th pct) | 282 | $12,417.12 | $8,460 | $3,957.12 | +46.8% |
+| **4: Adaptive (learned τ\*)** | **275** | **$12,207.54** | **$8,250** | **$3,957.54** | **+48.0%** |
 
-Best-case calibrated ROI from the optimisation curve: **343%**.
+Adaptive threshold optimiser learns τ* ≈ $30.11 (per-customer cost breakeven) on the expected-profit score, matching the best hand-tuned rule while dominating random/high-risk targeting.
+
+Best-case calibrated ROI from the optimisation curve: **≈258%** (at $5/customer).
 
 ---
 

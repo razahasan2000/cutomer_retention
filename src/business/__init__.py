@@ -1,2 +1,2 @@
 from src.business.customer_value import CustomerLifetimeValue
-from src.business.retention_optimizer import RetentionOptimizer
+from src.business.retention_optimizer import RetentionOptimizer, expected_profit

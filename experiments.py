@@ -29,7 +29,7 @@ from src.prediction import (MODEL_REGISTRY, LogisticRegressionModel, RandomFores
 from src.explainability import SHAPExplainer, PermutationImportance, ExplanationEvaluation
 from src.survival import KaplanMeierAnalysis, CoxPHAnalysis, RandomSurvivalForestAnalysis
 from src.counterfactual import DiCECounterfactual
-from src.business import CustomerLifetimeValue, RetentionOptimizer
+from src.business import CustomerLifetimeValue, RetentionOptimizer, expected_profit
 from src.fairness import FairnessEvaluator
 from src.robustness import NoiseInjector, ShiftSimulator
 from src.statistics import BootstrapInference, delong_roc_test, mcnemar_test, CalibrationEvaluator
@@ -490,51 +490,54 @@ class BusinessDecisionExperiment:
                  retention_success_rate: float = 0.3) -> pd.DataFrame:
         n = len(churn_probs)
         rng = np.random.RandomState(config.SEED)
+        churn_probs = np.asarray(churn_probs, dtype=float)
+        clv_values = np.asarray(clv_values, dtype=float)
 
         # Scenario 1: Random
         n_random = int(min(budget / retention_cost, n))
         random_idx = rng.choice(n, n_random, replace=False)
-        random_saved = int((churn_probs[random_idx] > 0.5).sum() * retention_success_rate)
-        s1_revenue = float(clv_values[random_idx].sum() * retention_success_rate * 0.3)
-        s1_cost = n_random * retention_cost
-        s1_roi = ((s1_revenue - s1_cost) / s1_cost * 100) if s1_cost > 0 else 0
+        s1_mask = np.zeros(n, dtype=bool); s1_mask[random_idx] = True
+        s1_saved, s1_cost, _, s1_roi = expected_profit(
+            churn_probs, clv_values, s1_mask, retention_cost, retention_success_rate)
+        s1_profit = s1_saved - s1_cost
 
-        # Scenario 2: High churn probability only
+        # Scenario 2: High churn probability only (fixed threshold 0.7)
         high_risk = churn_probs >= 0.7
         n_high = int(high_risk.sum())
         n_target_high = min(int(budget / retention_cost), n_high)
         high_idx = np.where(high_risk)[0][:n_target_high]
-        s2_saved = int(n_target_high * retention_success_rate)
-        s2_revenue = float(clv_values[high_idx].sum() * retention_success_rate * 0.5)
-        s2_cost = n_target_high * retention_cost
-        s2_roi = ((s2_revenue - s2_cost) / s2_cost * 100) if s2_cost > 0 else 0
+        s2_mask = np.zeros(n, dtype=bool); s2_mask[high_idx] = True
+        s2_saved, s2_cost, _, s2_roi = expected_profit(
+            churn_probs, clv_values, s2_mask, retention_cost, retention_success_rate)
+        s2_profit = s2_saved - s2_cost
 
-        # Scenario 3: ESACRIF-recommended (high risk + high CLV)
+        # Scenario 3: ESACRIF-recommended (high risk + high CLV, fixed 80th pctile)
         esacrif_score = churn_probs * clv_values
         esacrif_threshold = np.percentile(esacrif_score, 80)
-        esacrif_idx = np.where(esacrif_score >= esacrif_threshold)[0]
-        n_esacrif = int(min(budget / retention_cost, len(esacrif_idx)))
-        esacrif_idx = esacrif_idx[:n_esacrif]
-        s3_saved = int(n_esacrif * retention_success_rate)
-        s3_revenue = float(clv_values[esacrif_idx].sum() * retention_success_rate * 0.7)
-        s3_cost = n_esacrif * retention_cost
-        s3_roi = ((s3_revenue - s3_cost) / s3_cost * 100) if s3_cost > 0 else 0
+        esacrif_mask = np.zeros(n, dtype=bool)
+        cand = np.where(esacrif_score >= esacrif_threshold)[0]
+        n_esacrif = int(min(budget / retention_cost, len(cand)))
+        esacrif_idx = cand[:n_esacrif]
+        esacrif_mask[esacrif_idx] = True
+        s3_saved, s3_cost, _, s3_roi = expected_profit(
+            churn_probs, clv_values, esacrif_mask, retention_cost, retention_success_rate)
+        s3_profit = s3_saved - s3_cost
 
         rows = [
             {"Scenario": "1: Random Campaign", "Customers Targeted": n_random,
-             "Customers Saved": random_saved, "Revenue Retained": round(s1_revenue, 2),
-             "Cost": round(s1_cost, 2), "ROI %": round(s1_roi, 2),
-             "Profit": round(s1_revenue - s1_cost, 2),
+             "Customers Saved": round(retention_success_rate * n_random, 1),
+             "Revenue Retained": round(s1_saved, 2), "Cost": round(s1_cost, 2),
+             "ROI %": round(s1_roi, 2), "Profit": round(s1_profit, 2),
              "Strategy": "Random selection"},
             {"Scenario": "2: High-Risk Only", "Customers Targeted": n_target_high,
-             "Customers Saved": s2_saved, "Revenue Retained": round(s2_revenue, 2),
-             "Cost": round(s2_cost, 2), "ROI %": round(s2_roi, 2),
-             "Profit": round(s2_revenue - s2_cost, 2),
+             "Customers Saved": round(retention_success_rate * n_target_high, 1),
+             "Revenue Retained": round(s2_saved, 2), "Cost": round(s2_cost, 2),
+             "ROI %": round(s2_roi, 2), "Profit": round(s2_profit, 2),
              "Strategy": "p(churn) > 0.7"},
             {"Scenario": "3: ESACRIF-Recommended", "Customers Targeted": n_esacrif,
-             "Customers Saved": s3_saved, "Revenue Retained": round(s3_revenue, 2),
-             "Cost": round(s3_cost, 2), "ROI %": round(s3_roi, 2),
-             "Profit": round(s3_revenue - s3_cost, 2),
+             "Customers Saved": round(retention_success_rate * n_esacrif, 1),
+             "Revenue Retained": round(s3_saved, 2), "Cost": round(s3_cost, 2),
+             "ROI %": round(s3_roi, 2), "Profit": round(s3_profit, 2),
              "Strategy": "p(churn) x CLV > 80th pctile"},
         ]
         df = pd.DataFrame(rows)
@@ -1016,6 +1019,25 @@ class PublicationOutputGenerator:
         ax1.set_title("Business Impact: ROI Optimization")
         self._save_fig(fig, "figure8_roi_optimization")
 
+    def figure8b_adaptive_threshold(self, sweep_df: pd.DataFrame, best_row: Dict):
+        if sweep_df is None or sweep_df.empty:
+            fig, ax = plt.subplots(); ax.text(0.5, 0.5, "No adaptive data", ha="center")
+            self._save_fig(fig, "figure8b_adaptive_threshold"); return
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        ax1.plot(sweep_df["threshold"], sweep_df["net_benefit"], "b-", lw=2, label="Expected Net Benefit")
+        ax1.set_xlabel("Intervention Threshold (tau)"); ax1.set_ylabel("Expected Net Benefit ($)", color="b")
+        ax2 = ax1.twinx()
+        ax2.plot(sweep_df["threshold"], sweep_df["roi_pct"], "r--", lw=2, label="ROI %")
+        ax2.set_ylabel("ROI %", color="r")
+        ax1.axhline(y=0, color="gray", ls=":")
+        tau_star = best_row.get("threshold")
+        if tau_star is not None:
+            ax1.axvline(x=tau_star, color="green", ls="--", lw=2,
+                        label=f"tau*={tau_star}")
+            ax1.legend(loc="upper left")
+        ax1.set_title("Adaptive Intervention Optimization: Expected Profit vs Threshold")
+        self._save_fig(fig, "figure8b_adaptive_threshold")
+
     def figure9_explanation_stability(self, stability_df: pd.DataFrame):
         fig, ax = plt.subplots(figsize=(10, 6))
         models = stability_df["Model"].unique() if "Model" in stability_df.columns else []
@@ -1226,6 +1248,28 @@ class Q1Experiments:
         opt = RetentionOptimizer()
         roi_curve = BusinessImpactExperiment().roi_optimization_curve(churn_probs, clv_vals)
         self.results_all["business_roi_curve"] = roi_curve
+
+        # Adaptive intervention optimization: learn the threshold that maximizes
+        # expected business profit instead of using a fixed rule.
+        adaptive_sweep, adaptive_best = opt.optimal_threshold(
+            churn_probs, clv_vals, intervention_cost=30, success_rate=0.3, budget=50000)
+        self.results_all["business_adaptive_sweep"] = adaptive_sweep
+        self.results_all["business_adaptive_best"] = adaptive_best
+        logger.info(f"  Adaptive intervention: learned threshold tau* = {adaptive_best['threshold']} "
+                    f"(net=${adaptive_best['net_benefit']:.2f}, ROI={adaptive_best['roi_pct']:.1f}%)")
+
+        adaptive_row = {
+            "Scenario": "4: Adaptive (learned threshold)",
+            "Customers Targeted": adaptive_best["n_targeted"],
+            "Customers Saved": round(0.3 * adaptive_best["n_targeted"], 1),
+            "Revenue Retained": adaptive_best["expected_revenue_saved"],
+            "Cost": adaptive_best["total_cost"],
+            "ROI %": adaptive_best["roi_pct"],
+            "Profit": round(adaptive_best["expected_revenue_saved"] - adaptive_best["total_cost"], 2),
+            "Strategy": f"learned tau*={adaptive_best['threshold']}",
+        }
+        scenarios = pd.concat([scenarios, pd.DataFrame([adaptive_row])], ignore_index=True)
+        self.results_all["business_scenarios"] = scenarios
         return scenarios
 
     def run_experiment_7_fairness(self):
@@ -1405,6 +1449,10 @@ class Q1Experiments:
         if "business_scenarios" in self.results_all:
             pub.table8_business_impact(self.results_all["business_scenarios"])
 
+        if "business_adaptive_sweep" in self.results_all:
+            pub._save_table(self.results_all["business_adaptive_sweep"],
+                            "table8b_adaptive_threshold")
+
         if "fairness" in self.results_all:
             pub.table9_fairness(self.results_all["fairness"])
 
@@ -1451,6 +1499,11 @@ class Q1Experiments:
 
         if "business_roi_curve" in self.results_all:
             pub.figure8_roi_optimization(self.results_all["business_roi_curve"])
+
+        if "business_adaptive_sweep" in self.results_all:
+            pub.figure8b_adaptive_threshold(
+                self.results_all["business_adaptive_sweep"],
+                self.results_all.get("business_adaptive_best", {}))
 
         if "explanation_stability" in self.results_all:
             pub.figure9_explanation_stability(self.results_all["explanation_stability"])
@@ -1499,22 +1552,21 @@ class BusinessImpactExperiment:
         self.results = {}
 
     def simulate_campaign(self, churn_probs: np.ndarray, clv_values: np.ndarray,
-                          costs: list = None, thresholds: list = None) -> pd.DataFrame:
+                           costs: list = None, thresholds: list = None) -> pd.DataFrame:
         costs = costs or [20]
         thresholds = thresholds or [0.5]
         rows = []
         for cost in costs:
             for thresh in thresholds:
-                n_target = int((churn_probs >= thresh).sum())
-                if n_target == 0:
+                mask = np.asarray(churn_probs) >= thresh
+                if int(mask.sum()) == 0:
                     continue
-                high_idx = np.where(churn_probs >= thresh)[0]
-                revenue = float(clv_values[high_idx].sum() * 0.3 * 0.7)
-                total_cost = n_target * cost
-                roi = ((revenue - total_cost) / total_cost * 100) if total_cost > 0 else 0
+                saved, total_cost, net, roi = expected_profit(
+                    np.asarray(churn_probs, dtype=float), np.asarray(clv_values, dtype=float),
+                    mask, cost, 0.3)
                 rows.append({
                     "Threshold": thresh, "Cost": cost,
-                    "Targeted": n_target, "Revenue": round(revenue, 2),
+                    "Targeted": int(mask.sum()), "Revenue": round(saved, 2),
                     "Cost_Total": round(total_cost, 2), "ROI": round(roi, 2)
                 })
         return pd.DataFrame(rows)
@@ -1522,16 +1574,18 @@ class BusinessImpactExperiment:
     @staticmethod
     def roi_optimization_curve(churn_probs, clv_values, cost_range=(5, 100, 5)):
         costs = np.arange(*cost_range)
+        churn_probs = np.asarray(churn_probs, dtype=float)
+        clv_values = np.asarray(clv_values, dtype=float)
         rows = []
         for cost in costs:
             budget = 50000
             n_target = min(int(budget / cost), len(churn_probs))
             esacrif_score = churn_probs * clv_values
             high_risk_idx = np.argsort(esacrif_score)[-n_target:]
-            revenue = float(clv_values[high_risk_idx].sum() * 0.3 * 0.7)
-            total_cost = n_target * cost
-            net = revenue - total_cost
-            roi = ((revenue - total_cost) / total_cost * 100) if total_cost > 0 else 0
+            mask = np.zeros(len(churn_probs), dtype=bool)
+            mask[high_risk_idx] = True
+            saved, total_cost, net, roi = expected_profit(
+                churn_probs, clv_values, mask, cost, 0.3)
             rows.append({"cost_per_customer": cost, "net_benefit": round(net, 2), "roi_pct": round(roi, 2)})
         return pd.DataFrame(rows)
 

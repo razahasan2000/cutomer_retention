@@ -182,12 +182,32 @@ def test_business():
     opt = RetentionOptimizer()
     sim = opt.simulate_intervention(0.8, 0.3, 1000, 50)
     assert "roi_pct" in sim
-    biz = BusinessImpactExperiment()
-    churn_probs = np.array([0.1, 0.3, 0.6, 0.9])
-    clv_vals = np.array([100, 200, 300, 400])
-    campaign = biz.simulate_campaign(churn_probs, clv_vals, costs=[20], thresholds=[0.5])
-    assert len(campaign) > 0
+
+    # Adaptive intervention optimization: learn the profit-maximizing threshold
+    churn_probs = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
+    clv_vals = np.array([100, 200, 300, 400, 500])
+    sweep, best = opt.optimal_threshold(churn_probs, clv_vals, intervention_cost=30,
+                                        success_rate=0.3, budget=10000)
+    assert "threshold" in sweep.columns
+    assert len(sweep) > 0
+    # best threshold must equal the argmax of net_benefit over the sweep
+    argmax_tau = float(sweep.loc[sweep["net_benefit"].idxmax(), "threshold"])
+    assert abs(argmax_tau - best["threshold"]) < 1e-6
+    # best net benefit is the maximum observed
+    assert best["net_benefit"] >= sweep["net_benefit"].max() - 1e-6
+
+    # Empty mask (all below threshold) must not crash and returns zero profit
+    sweep_empty, best_empty = opt.optimal_threshold(
+        np.array([0.01, 0.02]), np.array([10, 20]), intervention_cost=30)
+    assert best_empty is not None
     print(f"  Business: all tests passed")
+
+    biz = BusinessImpactExperiment()
+    biz_probs = np.array([0.1, 0.3, 0.6, 0.9])
+    biz_clv = np.array([100, 200, 300, 400])
+    campaign = biz.simulate_campaign(biz_probs, biz_clv, costs=[20], thresholds=[0.5])
+    assert len(campaign) > 0
+    print(f"  Business impact: all tests passed")
 
 
 def test_publication_tables():

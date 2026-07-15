@@ -419,8 +419,34 @@ elif page == "9. Business Intelligence":
             with col_b:
                 threshold = st.slider("Risk Threshold", 0.1, 0.9, 0.5, 0.05)
             opt = RetentionOptimizer()
-            sim = opt.simulate_intervention(0.8, 0.3, clv_values.mean(), cost)
-            st.json(sim)
+            adaptive = st.checkbox("Learn optimal threshold (adaptive)", value=False,
+                                  help="Sweep thresholds and pick tau* maximizing expected profit")
+            if adaptive:
+                sweep, best = opt.optimal_threshold(
+                    churn_probs, clv_values, intervention_cost=cost,
+                    success_rate=0.3, budget=50000)
+                st.success(f"Learned threshold tau* = {best['threshold']} "
+                           f"(Net=${best['net_benefit']:.2f}, ROI={best['roi_pct']:.1f}%)")
+                st.json({k: best[k] for k in
+                         ("threshold", "n_targeted", "expected_revenue_saved",
+                          "total_cost", "net_benefit", "roi_pct")})
+                if not sweep.empty:
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(x=sweep["threshold"], y=sweep["net_benefit"],
+                                            mode="lines", name="Net Benefit", line=dict(color="blue")))
+                    fig.add_trace(go.Scatter(x=sweep["threshold"], y=sweep["roi_pct"],
+                                            mode="lines", name="ROI %", yaxis="y2",
+                                            line=dict(color="red", dash="dash")))
+                    fig.add_vline(x=best["threshold"], line_dash="dot", line_color="green")
+                    fig.update_layout(title="Adaptive Threshold Sweep",
+                                      xaxis_title="Threshold (tau)",
+                                      yaxis_title="Net Benefit ($)",
+                                      yaxis2=dict(title="ROI %", overlaying="y", side="right"),
+                                      height=450)
+                    st.plotly_chart(fig, use_container_width=True)
+            else:
+                sim = opt.simulate_intervention(0.8, 0.3, clv_values.mean(), cost)
+                st.json(sim)
     else:
         st.warning("Train models first")
 
