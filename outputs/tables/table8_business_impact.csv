@@ -2,4 +2,4 @@
 0,1: Random Campaign,1409,422.7,25227.24,42270.0,-40.32,-17042.76,Random selection
 1,2: High-Risk Only,367,110.1,8339.44,11010.0,-24.26,-2670.56,p(churn) > 0.7
 2,3: ESACRIF-Recommended,282,84.6,12417.12,8460.0,46.77,3957.12,p(churn) x CLV > 80th pctile
-3,4: Adaptive (learned threshold),0,0.0,0.0,0.0,0.0,0.0,learned tau*=0.95
+3,4: Adaptive (learned threshold),275,82.5,12207.54,8250.0,47.97,3957.54,learned tau*=30.1126

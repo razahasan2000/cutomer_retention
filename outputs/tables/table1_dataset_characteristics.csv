@@ -1,5 +1,2 @@
 Dataset,Domain,Source,Samples,Features,Churn Rate,Provider,Real
-Telco,Telecom,Kaggle / IBM Sample Data Sets,7043,46,26.5%,IBM/US,Yes
-Iranian,Telecom,UCI Machine Learning Repository,3150,19,15.7%,Iranian,Yes
-Cell2cell,Telecom,Teradata Center / Duke University (via Kaggle),10000,82,30.4%,US Wireless,Yes
-Telco_fe,Telecom,,7043,35,26.5%,,Yes
+Test,Test,Test,100,10,30.0%,,Yes

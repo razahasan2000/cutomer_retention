@@ -101,6 +101,18 @@ Expected profit model: expected saved = success_rate × p(churn) × CLV − cost
 
 Adaptive threshold optimiser learns τ* ≈ $30.11 (per-customer cost breakeven) on the expected-profit score, matching the best hand-tuned rule while dominating random/high-risk targeting.
 
+### 8a. Adaptive vs fixed probability thresholds (paired bootstrap B=2000)
+
+| Fixed threshold | Targeted | Net profit | Δ vs adaptive | Bootstrap CI (2.5%, 97.5%) | Wilcoxon p | Significant |
+|---|---|---|---|---|---|---|
+| p ≥ 0.3 | 794 | −$3,565.77 | +$7,523.31 | [6,902, 8,103] | <0.001 | Yes |
+| p ≥ 0.4 | 702 | −$2,975.80 | +$6,933.34 | [6,313, 7,493] | <0.001 | Yes |
+| p ≥ 0.5 (conventional) | 594 | −$3,444.33 | +$7,401.87 | [6,331, 8,883] | <0.001 | Yes |
+| p ≥ 0.6 | 477 | −$3,192.06 | +$7,149.60 | [6,083, 8,689] | <0.001 | Yes |
+| p ≥ 0.7 | 367 | −$2,670.56 | +$6,628.10 | [5,599, 8,170] | <0.001 | Yes |
+
+Every fixed probability threshold (including the conventional 0.5) is unprofitable on its own; the adaptive rule is the only profitable policy. Paired bootstrap (B=2000) of the per-customer profit difference and a Wilcoxon signed-rank test both confirm the adaptive gain is significant (all CIs exclude 0, all p<0.001). Reported in `table8c_threshold_comparison.csv` and `figure8c_threshold_comparison`.
+
 Best-case calibrated ROI from the optimisation curve: **≈258%** (at $5/customer).
 
 ---

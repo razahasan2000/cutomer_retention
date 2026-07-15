@@ -1038,6 +1038,30 @@ class PublicationOutputGenerator:
         ax1.set_title("Adaptive Intervention Optimization: Expected Profit vs Threshold")
         self._save_fig(fig, "figure8b_adaptive_threshold")
 
+    def figure8c_threshold_comparison(self, comparison_df: pd.DataFrame, summary: Dict):
+        if comparison_df is None or comparison_df.empty:
+            fig, ax = plt.subplots(); ax.text(0.5, 0.5, "No comparison data", ha="center")
+            self._save_fig(fig, "figure8c_threshold_comparison"); return
+        labels = [f"p>={t}" for t in comparison_df["threshold"].tolist()] + ["Adaptive"]
+        profits = comparison_df["net_profit"].tolist() + [summary.get("adaptive_net_profit", 0)]
+        sig_marks = []
+        for _, r in comparison_df.iterrows():
+            if r.get("significant"):
+                sig_marks.append("***" if (r.get("wilcoxon_p") is not None and r["wilcoxon_p"] < 0.001) else "*")
+            else:
+                sig_marks.append("ns")
+        sig_marks = sig_marks + [""]
+        fig, ax = plt.subplots(figsize=(10, 6))
+        colors = ["#bbbbbb"] * len(comparison_df) + ["#2e86c1"]
+        bars = ax.bar(labels, profits, color=colors)
+        ax.axhline(y=0, color="black", lw=1)
+        for i, (p, s) in enumerate(zip(profits, sig_marks)):
+            va = "bottom" if p >= 0 else "top"
+            ax.text(i, p + (200 if p >= 0 else -200), f"{p:,.0f}\n{s}", ha="center", va=va, fontsize=8)
+        ax.set_ylabel("Expected Net Profit ($)")
+        ax.set_title("Adaptive vs Fixed Probability Thresholds (* p<0.05, *** p<0.001 via paired bootstrap/Wilcoxon)")
+        self._save_fig(fig, "figure8c_threshold_comparison")
+
     def figure9_explanation_stability(self, stability_df: pd.DataFrame):
         fig, ax = plt.subplots(figsize=(10, 6))
         models = stability_df["Model"].unique() if "Model" in stability_df.columns else []
@@ -1270,6 +1294,14 @@ class Q1Experiments:
         }
         scenarios = pd.concat([scenarios, pd.DataFrame([adaptive_row])], ignore_index=True)
         self.results_all["business_scenarios"] = scenarios
+
+        # Adaptive vs fixed probability thresholds with significance testing
+        comparison_df, comparison_summary = opt.compare_thresholds(
+            churn_probs, clv_vals, intervention_cost=30, success_rate=0.3, budget=50000)
+        self.results_all["business_threshold_comparison"] = comparison_df
+        self.results_all["business_threshold_summary"] = comparison_summary
+        logger.info(f"  Threshold comparison: adaptive net=${comparison_summary['adaptive_net_profit']:.2f} "
+                    f"vs fixed (p>=0.5 net=${comparison_df.loc[comparison_df['threshold']==0.5,'net_profit'].iloc[0]:.2f})")
         return scenarios
 
     def run_experiment_7_fairness(self):
@@ -1504,6 +1536,13 @@ class Q1Experiments:
             pub.figure8b_adaptive_threshold(
                 self.results_all["business_adaptive_sweep"],
                 self.results_all.get("business_adaptive_best", {}))
+
+        if "business_threshold_comparison" in self.results_all:
+            pub._save_table(self.results_all["business_threshold_comparison"],
+                            "table8c_threshold_comparison")
+            pub.figure8c_threshold_comparison(
+                self.results_all["business_threshold_comparison"],
+                self.results_all.get("business_threshold_summary", {}))
 
         if "explanation_stability" in self.results_all:
             pub.figure9_explanation_stability(self.results_all["explanation_stability"])
