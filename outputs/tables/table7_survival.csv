@@ -1,2 +1,6 @@
-,Group,N,Events,RMST,Median Survival,Time Horizon
-0,A,50,10,45.0,Not reached,72.0
+,Group,N,Events,RMST,Median,Feature,HR,CI,p,Sig
+0,Long,1695.0,48.0,71.54,NR,,,,,
+1,Medium,1473.0,166.0,66.42,NR,,,,,
+2,Short,3875.0,1655.0,36.3,35.0,,,,,
+3,,,,,,MonthlyCharges,1.0689,1.0659-1.0719,0.0,Yes
+4,,,,,,TotalCharges,0.9984,0.9984-0.9985,0.0,Yes

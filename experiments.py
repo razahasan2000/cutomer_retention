@@ -229,8 +229,9 @@ class CrossDatasetDomainShiftAnalysis:
 class ExplanationStabilityAnalyzer:
     """Measure stability of explanations across model families and CV folds."""
 
-    def __init__(self, n_folds: int = 5):
+    def __init__(self, n_folds: int = 5, shap_sample_cap: int = 300):
         self.n_folds = n_folds
+        self.shap_sample_cap = shap_sample_cap
         self.results = {}
 
     def analyze(self, X: np.ndarray, y: np.ndarray,
@@ -253,9 +254,16 @@ class ExplanationStabilityAnalyzer:
                     model.fit(X_tr, y_tr)
 
                     # SHAP importance (top_n features by mean |SHAP|)
+                    # Computed on a representative subsample of the test set:
+                    # exact Tree/Linear SHAP scales with rows x trees, and global
+                    # feature ranking is stable for ~300 instances (standard practice).
                     try:
+                        rng = np.random.RandomState(config.SEED + fold)
+                        n_shap = min(len(X_te), self.shap_sample_cap)
+                        shap_idx = rng.choice(len(X_te), n_shap, replace=False)
+                        X_te_shap = X_te[shap_idx]
                         model_type = "linear" if "Logistic" in m_name else "tree"
-                        explainer = SHAPExplainer(model.model, X_te, model_type=model_type)
+                        explainer = SHAPExplainer(model.model, X_te_shap, model_type=model_type)
                         explainer.explain()
                         imp = explainer.global_importance(feature_names)
                         shap_rank = imp["feature"].head(top_n).tolist()
@@ -351,7 +359,10 @@ class ExplanationStabilityAnalyzer:
             try:
                 model = m_cls()
                 model.fit(X_tr, y_tr)
-                explainer = SHAPExplainer(model.model, X_te, model_type="tree" if m_name != "LR" else "linear")
+                n_shap = min(len(X_te), 300)
+                rng = np.random.RandomState(config.SEED)
+                X_te_shap = X_te[rng.choice(len(X_te), n_shap, replace=False)]
+                explainer = SHAPExplainer(model.model, X_te_shap, model_type="tree" if m_name != "LR" else "linear")
                 explainer.explain()
                 imp = explainer.global_importance(feature_names)
                 shap_ranks[m_name] = imp["feature"].head(top_n).tolist()

@@ -127,12 +127,12 @@ Demographic parity: Gender disparity 0.0029 (fair); SeniorCitizen 0.2413 (exceed
 
 | Model | SHAP Spearman ρ | SHAP Kendall τ | Stability Score |
 |---|---|---|---|
-| Logistic Regression | 0.928 | 0.827 | 0.878 |
+| Logistic Regression | 0.921 | 0.818 | 0.870 |
 | Decision Tree | 1.000 | 1.000 | 1.000 |
 | Random Forest | 1.000 | 1.000 | 1.000 |
-| XGBoost | 0.940 | 0.829 | 0.885 |
-| LightGBM | 0.925 | 0.815 | 0.870 |
-| CatBoost | 0.938 | 0.834 | 0.886 |
+| XGBoost | 0.925 | 0.798 | 0.862 |
+| LightGBM | 0.934 | 0.836 | 0.885 |
+| CatBoost | 0.940 | 0.840 | 0.890 |
 | TabNet | 1.000 | 1.000 | 1.000 |
 
 Top drivers consistent across families: tenure, Contract_Month-to-month, MonthlyCharges, TotalCharges.
