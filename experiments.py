@@ -1010,6 +1010,85 @@ class PublicationOutputGenerator:
                 fontsize=9, ha="center", style="italic", transform=ax.transAxes)
         self._save_fig(fig, "figure1_decision_workflow")
 
+    def figure10_architecture(self):
+        """Formal ESACRIF architecture diagram (layers + auditing/validation)."""
+        import matplotlib.patches as mpatches
+        fig, ax = plt.subplots(figsize=(13, 7.5))
+        ax.set_xlim(0, 14)
+        ax.set_ylim(0, 8)
+        ax.axis("off")
+
+        def box(cx, cy, w, h, title, sub, color):
+            ax.add_patch(mpatches.FancyBboxPatch(
+                (cx - w / 2, cy - h / 2), w, h,
+                boxstyle="round,pad=0.08,rounding_size=0.15",
+                linewidth=1.5, edgecolor="#2c3e50", facecolor=color, alpha=0.95))
+            ax.text(cx, cy + h * 0.16, title, fontsize=10.5, fontweight="bold",
+                    ha="center", va="center", color="#1b2631")
+            ax.text(cx, cy - h * 0.20, sub, fontsize=7.3, ha="center", va="center",
+                    color="#34495e")
+
+        def arrow(x1, y1, x2, y2, rad=0.0):
+            ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
+                        arrowprops=dict(arrowstyle="-|>", color="#2c3e50", lw=1.8,
+                                        shrinkA=2, shrinkB=2,
+                                        connectionstyle=f"arc3,rad={rad}"))
+
+        C = {"data": "#d4e6f1", "fe": "#d5f5e3", "pred": "#fdebd0",
+             "surv": "#e8daef", "xai": "#fadbd8", "cf": "#d6eaf8",
+             "opt": "#f9e79f", "dec": "#aeb6bf"}
+        dash = "#bdc3c7"
+
+        # Main spine
+        box(1.6, 4.0, 2.4, 1.1, "Customer Data",
+            "Multi-source telecom\nautomated preprocessing", C["data"])
+        box(4.4, 4.0, 2.4, 1.1, "Behavioural Feature Eng.",
+            "AvgMonthlySpend, ContractRisk,\nChargeAcceleration, ...", C["fe"])
+        box(7.2, 4.0, 2.4, 1.1, "Predictive Models",
+            "7 families + ensemble\nSMOTE train-only", C["pred"])
+        # Branch intelligence layers (fed by Predictive, feed Decision)
+        box(10.2, 6.6, 2.6, 1.0, "Survival Intelligence",
+            "Kaplan–Meier · Cox PH · RMST", C["surv"])
+        box(10.2, 5.3, 2.6, 1.0, "Explainability & Stability",
+            "SHAP · 5-fold rank stability", C["xai"])
+        box(10.2, 4.0, 2.6, 1.0, "Counterfactual Action",
+            "DiCE minimal changes", C["cf"])
+        box(10.2, 2.7, 2.6, 1.0, "Business Optimisation",
+            "CLV · adaptive τ* (ROI)", C["opt"])
+        # Decision
+        box(12.8, 4.0, 2.2, 1.3, "Retention Decision",
+            "Who·When·Why·What·Value", C["dec"])
+
+        # Spine arrows
+        arrow(2.8, 4.0, 3.2, 4.0)
+        arrow(5.6, 4.0, 6.0, 4.0)
+        for by in (6.6, 5.3, 4.0, 2.7):
+            arrow(8.4, 4.0, 8.9, by, rad=0.18)
+        for by in (6.6, 5.3, 4.0, 2.7):
+            arrow(11.5, by, 11.7, 4.0, rad=0.18)
+
+        # Wrapping bars
+        ax.add_patch(mpatches.FancyBboxPatch((0.4, 7.2), 13.2, 0.62,
+                     boxstyle="round,pad=0.05", linewidth=1.2, edgecolor="#7d3c98",
+                     facecolor="#f5eef8", alpha=0.95))
+        ax.text(7.0, 7.51, "Statistical Validation:  DeLong · McNemar · Bootstrap CI   (seed 42, SMOTE train-only)",
+                fontsize=9, ha="center", va="center", color="#6c3483", fontweight="bold")
+        ax.add_patch(mpatches.FancyBboxPatch((0.4, 0.6), 13.2, 0.62,
+                     boxstyle="round,pad=0.05", linewidth=1.2, edgecolor="#1e8449",
+                     facecolor="#eafaf1", alpha=0.95))
+        ax.text(7.0, 0.91, "Responsible-AI Auditing:  Fairness (demographic parity, equal opportunity) · Robustness (noise, label-flip, missing)",
+                fontsize=9, ha="center", va="center", color="#196f3d", fontweight="bold")
+
+        # Dashed connectors: bars <-> spine modules
+        for mx in (1.6, 4.4, 7.2, 12.8):
+            ax.plot([mx, mx], [7.2, 4.55], ls=(0, (3, 3)), color=dash, lw=1)
+        for mx in (1.6, 4.4, 7.2, 12.8):
+            ax.plot([mx, mx], [4.45, 1.22], ls=(0, (3, 3)), color=dash, lw=1)
+
+        ax.set_title("Figure 10. Formal ESACRIF Architecture", fontsize=14,
+                     fontweight="bold", pad=12)
+        self._save_fig(fig, "figure10_architecture")
+
     def figure2_model_comparison(self, metrics_df: pd.DataFrame):
         fig, ax = plt.subplots(figsize=(10, 6))
         models = metrics_df.index.tolist() if hasattr(metrics_df, 'index') else list(metrics_df.keys())
@@ -1614,6 +1693,8 @@ class Q1Experiments:
 
         if "explanation_stability" in self.results_all:
             pub.figure9_explanation_stability(self.results_all["explanation_stability"])
+
+        pub.figure10_architecture()
 
         logger.info("  All Q1 publication outputs generated")
 

@@ -151,18 +151,17 @@ Bootstrap 95% CIs (n=2000) computed for all 7 models. DeLong: no pairwise AUC di
 
 ## 12. Baseline Framework Comparison
 
-Capability matrix against four representative baseline archetypes from the literature (✓ full, ◐ partial, ✗ absent).
+The formal ESACRIF architecture is shown in `outputs/figures/figure10_architecture.*`.
 
-| Capability | BF-1 Vanilla ML | BF-2 +SHAP | BF-3 Survival | BF-4 ROI/Prescriptive | **ESACRIF** |
-|---|---|---|---|---|---|
-| Discrimination (AUC) | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Calibration audit (ECE) | ◐ | ◐ | ◐ | ◐ | ✓ |
-| Temporal / survival timing | ✗ | ✗ | ✓ | ✗ | ✓ |
-| Stable explainability (rank agreement) | ✗ | ◐ | ✗ | ✗ | ✓ |
-| Counterfactual action | ✗ | ✗ | ✗ | ✗ | ✓ |
-| ROI / business optimisation | ✗ | ✗ | ✗ | ✓ | ✓ |
-| Statistical auditing (DeLong/McNemar/bootstrap) | ✗ | ✗ | ✗ | ✗ | ✓ |
-| Reproducible end-to-end pipeline | ◐ | ◐ | ◐ | ◐ | ✓ |
+Method comparison across intelligence dimensions (✓ full, ◐ partial, ✗ absent) — ESACRIF is the only method covering all seven:
+
+| Method | Prediction | Time-to-event | XAI | Counterfactual | Fairness | Business Action | Stat. Audit |
+|---|---|---|---|---|---|---|---|
+| BF-1 Vanilla ML | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| BF-2 ML + SHAP | ✓ | ✗ | ◐ | ✗ | ✗ | ✗ | ✗ |
+| BF-3 Survival-based | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| BF-4 Prescriptive/ROI | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ |
+| **ESACRIF (full)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 **Quantitative test of the deployed model (LR) vs each baseline model (DeLong AUC, McNemar predictions):**
 
