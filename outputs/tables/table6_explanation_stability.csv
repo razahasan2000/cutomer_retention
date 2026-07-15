@@ -1,0 +1,8 @@
+,Model,Top Features,SHAP Mean Spearman,SHAP Mean Kendall,Permutation Mean Spearman,Coef CV,Stability Score,Top Feature 1,Top Feature 2,Top Feature 3
+0,Logistic Regression,15,0.9279,0.8272,0.7195,0.044,0.8775,tenure,TotalCharges,Contract_Month-to-month
+1,Decision Tree,15,1.0,1.0,0.7027,0.0033,1.0,tenure,MonthlyCharges,TotalCharges
+2,Random Forest,15,1.0,1.0,0.6067,0.0005,1.0,tenure,MonthlyCharges,TotalCharges
+3,XGBoost,15,0.9404,0.8286,0.8252,0.0056,0.8845,Contract_Month-to-month,tenure,TotalCharges
+4,LightGBM,15,0.9245,0.8152,0.7753,4.5356,0.8698,Contract_Month-to-month,tenure,MonthlyCharges
+5,CatBoost,15,0.9375,0.8344,0.816,0.2255,0.886,tenure,Contract_Month-to-month,InternetService_Fiber optic
+6,TabNet,15,1.0,1.0,1.0,0.0188,1.0,tenure,MonthlyCharges,TotalCharges

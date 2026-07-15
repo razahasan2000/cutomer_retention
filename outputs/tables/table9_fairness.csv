@@ -1,0 +1,33 @@
+,Attribute,Group,Metric,Value,Overall Rate,Difference,Threshold,Passes,Interpretation
+0,gender,Female,Demographic Parity,0.414,0.411,0.0029,0.1,True,Fair
+1,gender,Male,Demographic Parity,0.4082,0.411,-0.0029,0.1,True,Fair
+2,gender,Female,Equal Opportunity,0.8072,,—,0.1,True,TPR = 0.807
+3,gender,Male,Equal Opportunity,0.8,,—,0.1,True,TPR = 0.800
+4,gender,Female,Equalised Odds (class=0),0.2691,,—,0.1,True,Rate = 0.269
+5,gender,Female,Equalised Odds (class=1),0.8072,,—,0.1,True,Rate = 0.807
+6,gender,Male,Equalised Odds (class=0),0.2693,,—,0.1,True,Rate = 0.269
+7,gender,Male,Equalised Odds (class=1),0.8,,—,0.1,True,Rate = 0.800
+8,SeniorCitizen,0,Demographic Parity,0.3643,0.411,-0.0467,0.1,True,Fair
+9,SeniorCitizen,1,Demographic Parity,0.6524,0.411,0.2413,0.1,False,Potential bias detected
+10,SeniorCitizen,0,Equal Opportunity,0.7724,,—,0.1,True,TPR = 0.772
+11,SeniorCitizen,1,Equal Opportunity,0.895,,—,0.1,True,TPR = 0.895
+12,SeniorCitizen,0,Equalised Odds (class=0),0.2382,,—,0.1,True,Rate = 0.238
+13,SeniorCitizen,0,Equalised Odds (class=1),0.7724,,—,0.1,True,Rate = 0.772
+14,SeniorCitizen,1,Equalised Odds (class=0),0.479,,—,0.1,True,Rate = 0.479
+15,SeniorCitizen,1,Equalised Odds (class=1),0.895,,—,0.1,True,Rate = 0.895
+16,Partner,No,Demographic Parity,0.5254,0.411,0.1144,0.1,False,Potential bias detected
+17,Partner,Yes,Demographic Parity,0.2887,0.411,-0.1224,0.1,False,Potential bias detected
+18,Partner,No,Equal Opportunity,0.8492,,—,0.1,True,TPR = 0.849
+19,Partner,Yes,Equal Opportunity,0.722,,—,0.1,True,TPR = 0.722
+20,Partner,No,Equalised Odds (class=0),0.3662,,—,0.1,True,Rate = 0.366
+21,Partner,No,Equalised Odds (class=1),0.8492,,—,0.1,True,Rate = 0.849
+22,Partner,Yes,Equalised Odds (class=0),0.1826,,—,0.1,True,Rate = 0.183
+23,Partner,Yes,Equalised Odds (class=1),0.722,,—,0.1,True,Rate = 0.722
+24,Dependents,No,Demographic Parity,0.5031,0.411,0.0921,0.1,True,Fair
+25,Dependents,Yes,Demographic Parity,0.1957,0.411,-0.2153,0.1,False,Potential bias detected
+26,Dependents,No,Equal Opportunity,0.8412,,—,0.1,True,TPR = 0.841
+27,Dependents,Yes,Equal Opportunity,0.6258,,—,0.1,True,TPR = 0.626
+28,Dependents,No,Equalised Odds (class=0),0.3493,,—,0.1,True,Rate = 0.349
+29,Dependents,No,Equalised Odds (class=1),0.8412,,—,0.1,True,Rate = 0.841
+30,Dependents,Yes,Equalised Odds (class=0),0.1172,,—,0.1,True,Rate = 0.117
+31,Dependents,Yes,Equalised Odds (class=1),0.6258,,—,0.1,True,Rate = 0.626

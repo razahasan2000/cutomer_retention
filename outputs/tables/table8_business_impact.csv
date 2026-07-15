@@ -1,0 +1,4 @@
+,Scenario,Customers Targeted,Customers Saved,Revenue Retained,Cost,ROI %,Profit,Strategy
+0,1: Random Campaign,1409,178,25950.8,42270,-38.61,-16319.2,Random selection
+1,2: High-Risk Only,367,110,5258.46,11010,-52.24,-5751.54,p(churn) > 0.7
+2,3: ESACRIF-Recommended,282,84,16107.91,8460,90.4,7647.91,p(churn) x CLV > 80th pctile
