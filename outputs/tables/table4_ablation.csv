@@ -1,6 +1,6 @@
-,Configuration,roc_auc,f1,recall,precision,pr_auc,brier,Interpretability,N_Features
-0,A: Traditional ML Only,0.8397,0.6157,0.7968,0.5017,0.6272,0.1683,40,46
-1,B: ML + Feature Engineering,0.8447,0.6088,0.7781,0.5,0.6579,0.1654,0,51
-2,C: ML + Explainability,0.8397,0.6157,0.7968,0.5017,0.6272,0.1683,70,46
-3,D: ML + Survival Analysis,0.8397,0.6157,0.7968,0.5017,0.6272,0.1683,70,46
-4,E: Full ESACRIF,0.8412,0.6094,0.6444,0.5779,0.6527,0.1427,60,51
+Configuration,roc_auc,f1,recall,precision,pr_auc,brier,ECE,Interpretability,N_Layers,Layers,Business ROI,N_Features
+A: Prediction only,0.8397,0.6157,0.7968,0.5017,0.6272,0.1683,0.1446,40,1,Prediction,—,46
+B: + Feature Engineering,0.8447,0.6088,0.7781,0.5,0.6579,0.1654,0.1463,0,2,"Prediction, FE",—,51
+C: + Explainability (SHAP),0.8447,0.6088,0.7781,0.5,0.6579,0.1654,0.1463,30,3,"Prediction, FE, XAI",—,51
+D: + Survival Analysis,0.8447,0.6088,0.7781,0.5,0.6579,0.1654,0.1463,60,4,"Prediction, FE, XAI, Survival",—,51
+E: Full ESACRIF (+ adaptive ROI),0.8412,0.6094,0.6444,0.5779,0.6527,0.1427,0.0571,60,5,"Prediction, FE, XAI, Survival, Optimisation","+48.0% (adaptive, Table 8)",51
