@@ -1,0 +1,7 @@
+ESACRIF model (LR) vs,DeLong z,DeLong p,DeLong sig (p<0.05),McNemar p,McNemar sig (p<0.05)
+CatBoost,0.0009,0.999306,No,0.0,Yes
+Decision Tree,0.0073,0.994212,No,0.0,Yes
+LightGBM,0.0019,0.998469,No,0.0,Yes
+Random Forest,0.0045,0.996407,No,0.0,Yes
+TabNet,0.0035,0.997181,No,0.0,Yes
+XGBoost,0.0036,0.997105,No,0.0,Yes

@@ -1,0 +1,7 @@
+,source,target,roc_auc,pr_auc,brier,recall,aligned_features,interpretation
+0,telco,iranian,0.51,0.1483,0.1752,0.1232,3,Moderate domain shift
+1,telco,cell2cell,0.4764,0.2901,0.2555,0.0978,3,Moderate domain shift
+2,iranian,telco,0.76,0.5212,0.1895,0.4746,3,Moderate domain shift
+3,iranian,cell2cell,0.4808,0.2917,0.299,0.0826,3,Moderate domain shift
+4,cell2cell,telco,0.3788,0.2012,0.2251,0.0,3,Strong domain shift
+5,cell2cell,iranian,0.6303,0.2142,0.1517,0.002,3,Moderate domain shift

@@ -1,0 +1,9 @@
+,Attribute,Group,N,AUC
+0,gender,Female,3488,0.8489
+1,gender,Male,3555,0.845
+2,SeniorCitizen,0,5901,0.8481
+3,SeniorCitizen,1,1142,0.8038
+4,Partner,No,3641,0.8266
+5,Partner,Yes,3402,0.8567
+6,Dependents,No,4933,0.8326
+7,Dependents,Yes,2110,0.8544
